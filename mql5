@@ -1,0 +1,54 @@
+
+// Forex Robot Easy Team
+// Developer's site: forexroboteasy.com
+
+// Ice Scalper Pro - Fully Automated Scalping Robot
+
+// Include necessary libraries
+#include <Trade\Trade.mqh>
+#include <Trade\PositionInfo.mqh>
+
+// Initialize variables
+input double lotSize = 0.01; // Trading lot size
+input int stopLoss = 20; // Stop loss in pips
+input int takeProfit = 40; // Take profit in pips
+input int slippage = 3; // Allowed slippage in points
+
+// Initialize trading objects
+CTrade trade;
+CPositionInfo positionInfo;
+
+// Define the main function
+void OnTick()
+{
+   // Check if there are any open positions
+   if(positionInfo.Total() == 0)
+   {
+      // Calculate the previous high and low
+      double previousHigh = iHigh(_Symbol, PERIOD_CURRENT, 1);
+      double previousLow = iLow(_Symbol, PERIOD_CURRENT, 1);
+      
+      // Check if the current price is above the previous high
+      if(Bid > previousHigh)
+      {
+         // Place a pending order to buy
+         trade.BuyStop(lotSize, previousHigh, previousHigh - stopLoss, previousHigh + takeProfit, slippage);
+      }
+      
+      // Check if the current price is below the previous low
+      if(Bid < previousLow)
+      {
+         // Place a pending order to sell
+         trade.SellStop(lotSize, previousLow, previousLow + stopLoss, previousLow - takeProfit, slippage);
+      }
+   }
+}
+
+// Define the OnDeinit function
+void OnDeinit(const int reason)
+{
+   // Close any open positions
+   trade.CloseAll();
+}
+
+// End of code
